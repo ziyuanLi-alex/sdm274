@@ -68,27 +68,59 @@ class Perception:
     
     def train(self,X_train,y_train):
         X_train_bar = self._preprocess_data(X_train)
-        # print(X_train_bar)
+        print(X_train_bar)
         self.S_Update(X_train_bar,y_train)
-        # print(self.W)
+        print(self.W)
+
+    def predict(self,X):
+        return self._preprocess_data(X) @ self.W
 
     def plot_show(self):
         plt.plot(self.loss)
+        plt.xlabel('time')
+        plt.ylabel('loss')
         plt.grid()
         plt.show()
 
-data = pd.read_csv('C:\\Users\\sunyy\\Desktop\\SUSTECH\\Y\\code\\人工智能与机器学习\\assignment2\\wine.data',header=None)
-data = data.drop(data.index[-48:]).sample(frac=0.7).reset_index(drop=True)
-print(data)
+    def plot_show_test(self,X_test,y_test):
+        y_predict = self.predict(X_test)
+        x = []
+        for i in range(1,len(y_test)+1):
+            x.append(i)
+        y_predict = y_predict/np.abs(y_predict)
+        plt.scatter(x,y_predict,c='b',marker='o')
+        plt.scatter(x,y_test,c='r',marker='^')
+        plt.show()
 
+        result = [0,0,0,0]
+        for i in range(len(x)):
+            if(y_predict[i]==1 and y_test[i]==1):
+                result[0] += 1
+            elif(y_predict[i]==1 and y_test[i]==-1):
+                result[1] += 1
+            elif(y_predict[i]==-1 and y_test[i]==1):
+                result[2] += 1
+            else:
+                result[3] += 1
+        return result
 
+dataA = pd.read_csv('C:\\Users\\sunyy\\Desktop\\SUSTECH\\Y\\code\\人工智能与机器学习\\assignment2\\wine.data',header=None)
+dataA = dataA.drop(dataA.index[-48:])
+data = dataA.sample(frac=0.7,random_state=15)
+test = dataA.drop(data.index)
 
-case1 = data.iloc[:59]
-case2 = data.iloc[60:]
+data = data.reset_index(drop=True)
+test = test.reset_index(drop=True)
 
 X_train = data.iloc[:,1:]
 y_train = data.iloc[:,0]
 y_train = y_train*2-3
+
+X_test = test.iloc[:,1:]
+y_test = test.iloc[:,0]
+y_test = y_test*2-3
+
+
 
 # print("X_train is ")
 # print(X_train)
@@ -97,3 +129,14 @@ perception = Perception(13,1000,3e-6,1e-10)
 perception.train(X_train,y_train)
 perception.plot_show()
 
+result = perception.plot_show_test(X_test,y_test)
+
+print(result)
+accuracy = (result[0]+result[3])/(result[0]+result[1]+result[2]+result[3])
+recall = (result[0])/(result[0]+result[2])
+precision = (result[0])/(result[0]+result[1])
+F1 = (2*precision*recall)/(precision+recall)
+print('Accuracy =',  accuracy)
+print('Recall =', recall)
+print('Percision =', precision)
+print('F1 score =', F1)
