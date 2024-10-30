@@ -4,6 +4,8 @@ class Module:
 
     def __init__(self):
         self.parameters = []
+        self.output_cache = None
+        self.input_cache = None
 
     def forward(self):
         raise NotImplementedError
@@ -49,3 +51,46 @@ class Linear(Module):
         
         return dX
 
+class Sigmoid(Module):
+    def __init__(self):
+        super().__init__()
+        
+
+    def forward(self, X):
+        A = 1 / (1 + np.exp(-X))
+        self.output_cache = A
+        return A
+
+    def backward(self, dA):
+        A = self.output_cache
+        dZ = dA * A * (1 - A)
+        return dZ
+
+class ReLU(Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, X):
+        self.output_cache = X
+        return np.maximum(0, X)
+
+    def backward(self, dA):
+        dZ = dA * (self.input_cache > 0).astype(float)
+        return dZ
+
+class Tanh(Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, X):
+        A = np.tanh(X)
+        self.output_cache = A
+        return A
+
+    def backward(self, dA):
+        A = self.output_cache
+        dZ = dA * (1 - A ** 2)
+        return dZ
+
+
+        
