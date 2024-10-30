@@ -75,7 +75,7 @@ class ReLU(Module):
         return np.maximum(0, X)
 
     def backward(self, dA):
-        dZ = dA * (self.input_cache > 0).astype(float)
+        dZ = dA * (self.output_cache > 0).astype(float)
         return dZ
 
 class Tanh(Module):
@@ -91,6 +91,20 @@ class Tanh(Module):
         A = self.output_cache
         dZ = dA * (1 - A ** 2)
         return dZ
+    
+class MSE(Module):
+
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, predicted, target):
+        return np.mean((predicted - target) ** 2)
+
+    def backward(self, predicted, target):
+        m = target.shape[0]
+        target = target.reshape(-1,1)
+        return 2 * (predicted - target) / m
+
 
 
         
