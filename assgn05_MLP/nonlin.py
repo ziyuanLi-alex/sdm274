@@ -4,9 +4,7 @@ import matplotlib.pyplot as plt
 
 def complex_nonlin_func(x):
     return (
-        np.sin(x) -
-        np.sinc(3*x) +
-        0.8 * np.exp(- x ** 2) +
+        np.sin(x) +
         0.3 * np.exp( np.abs(x)**0.5 )
     )
 

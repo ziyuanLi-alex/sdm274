@@ -6,6 +6,7 @@ class Module:
         self.parameters = []
         self.output_cache = None
         self.input_cache = None
+        self.isInference = False
 
     def forward(self):
         raise NotImplementedError
@@ -26,10 +27,11 @@ class Linear(Module):
         self.W = np.random.randn(input_size, output_size) * 0.1 
         self.b = np.zeros((1, output_size))
         self.parameters = {"W": self.W, "b": self.b}
-        self.input_cache = None
 
 
     def forward(self, X):
+        if self.isInference:
+            return np.dot(X, self.W) + self.b
         self.input_cache = X
         return np.dot(X, self.W) + self.b # X(m, input_size) @ W(input_size, output_size) + b(1, output_size) = Y(m, output_size)
         # X @ W + b = Y
@@ -50,6 +52,12 @@ class Linear(Module):
         self.parameters['db'] = db
         
         return dX
+    
+    def reset(self):
+        self.W = np.random.randn(self.input_size, self.output_size) * 0.1
+        self.b = np.zeros((1, self.output_size))
+        self.parameters = {"W": self.W, "b": self.b}
+        self.input_cache = None
 
 class Sigmoid(Module):
     def __init__(self):
@@ -58,6 +66,8 @@ class Sigmoid(Module):
 
     def forward(self, X):
         A = 1 / (1 + np.exp(-X))
+        if self.isInference:
+            return A
         self.output_cache = A
         return A
 
@@ -71,6 +81,8 @@ class ReLU(Module):
         super().__init__()
 
     def forward(self, X):
+        if self.isInference:
+            return np.maximum(0, X)
         self.output_cache = X
         return np.maximum(0, X)
 
@@ -84,6 +96,8 @@ class Tanh(Module):
 
     def forward(self, X):
         A = np.tanh(X)
+        if self.isInference:
+            return A
         self.output_cache = A
         return A
 
@@ -91,20 +105,5 @@ class Tanh(Module):
         A = self.output_cache
         dZ = dA * (1 - A ** 2)
         return dZ
-    
-class MSE(Module):
-
-    def __init__(self):
-        super().__init__()
-
-    def forward(self, predicted, target):
-        return np.mean((predicted - target) ** 2)
-
-    def backward(self, predicted, target):
-        m = target.shape[0]
-        target = target.reshape(-1,1)
-        return 2 * (predicted - target) / m
-
-
 
         
