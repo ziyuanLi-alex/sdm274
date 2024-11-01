@@ -1,5 +1,11 @@
 # Report for SDM274 Assgn05 MLP
 
+
+
+Author: Ziyuan Li, 12211225
+
+This document is created as a report for SDM274, Sustech.
+
 # Background
 
 Multiple Layer Perceptron(MLP) is a type of neural network, primarily used in supervised learning. It’s made up of multiple layers of nodes, or neurons, organized into an input layer, one or more hidden layers, and an output layer. Each neuron is connected to every neuron in the previous and following layer (fully connected), and each connection has an associated weight, which is learned during training.
@@ -95,7 +101,7 @@ Layers with learnable parameters, such as `Linear`, define and manage their para
 
 ### *The source code is provided in the appendix*
 
-# Experiment Records
+# Nonlinear Regression with MLP
 
 ## Design of the Network
 
@@ -325,6 +331,41 @@ Layer 3: LinearInput size: 128, Output size: 1
 
 ## Test 3 - Deeper Nets
 
+```markdown
+Average validation loss: 0.09484475132123227
+Hyperparameters are: Epochs: 8000, LR: 0.4
+Model structure:
+Layer 1: LinearInput size: 1, Output size: 128
+Layer 2: ReLU
+Layer 3: LinearInput size: 128, Output size: 512
+Layer 4: ReLU
+Layer 5: LinearInput size: 512, Output size: 1
+
+```
+
+Note: this network took 23m39.7s to finish the 5-fold cross validation.
+
+The result looks pretty good though.
+
+![image-20241031201845890](./assets/image-20241031201845890.png)
+
+## Test 4 - Simply Better Hyperparams
+
+```markdown
+Average validation loss: 0.06755265032590395
+Hyperparameters are: Epochs: 8000, LR: 0.1
+Model structure:
+Layer 1: LinearInput size: 1, Output size: 64
+Layer 2: ReLU
+Layer 3: LinearInput size: 64, Output size: 128
+Layer 4: ReLU
+Layer 5: LinearInput size: 128, Output size: 1
+```
+
+![image-20241031205423105](./assets/image-20241031205423105.png)
+
+Lots easier to train.
+
 ## Summary
 
 - Deeper and wider nets are more difficult to train. 
@@ -369,3 +410,150 @@ It is so resource-hungry that it might trigger **overflows**.
   ![image-20241031194606008](./assets/image-20241031194606008.png)
 
   What the program does is do tons of matrix multiplications for the training. It can cause the CPU to be fully loaded. But those matrix multiplications can be well accelerated by a GPU, which is suitable for computing simple calculations for millions of times.
+
+
+
+# Classification Using MLP
+
+## Data gathering
+
+We choose the Wisconsin breast cancer dataset for classification.
+
+```markdown
+Training data shape: (455, 30)
+Testing data shape: (114, 30)
+```
+
+Here I used a **PCA to reduce the dimensions of the data to 2**. Note that we use the original 30-feature dataset for training and predicting, and we're **only using PCA for visualizing purpose.**
+
+![image-20241101235332682](./assets/image-20241101235332682.png)
+
+I defined an MLPClassifier class that inherits from the wrapped MLP class. This structure ensures reusability.
+
+```python
+class MLPClassifier(MLP):
+
+    def __init__(self, layers, epochs=1000, lr=0.01, input_shape=1, output_shape=1):
+        super().__init__(layers, epochs, lr, input_shape, output_shape)
+        self.threshold = 0.5
+        
+    def get_loss(self, y_true, y_pred):
+        y_pred = y_pred.reshape(-1, 1)
+        # Clip predictions to prevent log(0)
+        y_pred = np.clip(y_pred, 1e-12, 1. - 1e-12)
+        # Compute cross-entropy loss
+        return -np.mean(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
+
+    def get_loss_grad(self, y_pred, y_true):
+        # The loss here is the cross-entropy loss
+        # It accepts matrix with the shape (x, n_classes)
+        # Where x is the number of samples and n_classes is the number of classes
+        
+        y_pred = y_pred.reshape(-1, 1)
+        # Clip predictions to prevent division by zero
+        y_pred = np.clip(y_pred, 1e-12, 1. - 1e-12)
+        # Compute gradient of cross-entropy loss
+        return (y_pred - y_true) / (y_pred * (1 - y_pred))
+    
+    def predict(self, X):
+        # Forward pass
+        y_pred = self.forward(X)
+        
+        # Convert the output to binary
+        return (y_pred > self.threshold).astype(int)
+
+    
+    
+```
+
+I reused the model structure for the nonlinear function training. It balances performance and resource.
+
+```python
+layers = [
+        Linear(input_size=30, output_size=64),
+        ReLU(),
+        Linear(input_size=64, output_size=128),
+        ReLU(),
+        Linear(input_size=128, output_size=1),
+        Sigmoid()
+    ]
+
+```
+
+I used MBGD in training, reaching about 400it/s with a good accuracy.
+
+```markdown
+Training MBGD: 100%|██████████| 2000/2000 [00:04<00:00, 412.34it/s]
+```
+
+![image-20241101235836912](./assets/image-20241101235836912.png)
+
+![image-20241101235851612](./assets/image-20241101235851612.png)
+
+The model achieved high F1 score on this dataset.
+
+```markdown
+Accuracy: 0.9649122807017544
+Recall: 0.971830985915493
+Precision: 0.971830985915493
+F1 Score: 0.971830985915493
+```
+
+![image-20241102001701164](./assets/image-20241102001701164.png)
+
+Above is the decision boundary of the trained MLP. As shown in the graph the boundary is **a folded line** instead of a straight line. This indicates that the MLP model has learned a **nonlinear decision boundary**. Unlike linear classifiers, which can only separate classes with straight lines or planes, an MLP with at least one hidden layer can model complex, nonlinear relationships between features.
+
+The dataset we choose here is largely linearly separable. Most parts of it can be approximately separated by a stright line, therefore the outliers won't punish the MLP to behave very non-linearly. Theoretically we can push the training and the parameters to extremes to let it  show more nonlinear characteristics, but that requires much more training resources and is somewhat beyond the scope of this assignment.
+
+Shown below is some sets cross-validation result. 
+
+```markdown
+Average validation loss: 0.8235056154333691
+Hyperparameters are: Epochs: 3000, LR: 0.1
+Model structure:
+Layer 1: LinearInput size: 30, Output size: 64
+Layer 2: ReLU
+Layer 3: LinearInput size: 64, Output size: 128
+Layer 4: ReLU
+Layer 5: LinearInput size: 128, Output size: 1
+Layer 6: Sigmoid
+```
+
+```markdown
+Average validation loss: 0.7517043588174628
+Hyperparameters are: Epochs: 2000, LR: 0.1
+Model structure:
+Layer 1: LinearInput size: 30, Output size: 64
+Layer 2: ReLU
+Layer 3: LinearInput size: 64, Output size: 128
+Layer 4: ReLU
+Layer 5: LinearInput size: 128, Output size: 1
+Layer 6: Sigmoid
+
+F1 Score: 0.9859154929577465
+```
+
+```markdown
+Average validation loss: 0.8006151770380503
+Hyperparameters are: Epochs: 2000, LR: 0.01
+Model structure:
+Layer 1: LinearInput size: 30, Output size: 64
+Layer 2: ReLU
+Layer 3: LinearInput size: 64, Output size: 128
+Layer 4: ReLU
+Layer 5: LinearInput size: 128, Output size: 1
+Layer 6: Sigmoid
+
+F1 Score: 0.9929078014184397
+```
+
+We have almost come to the best of this structure, achieving very high F1 scores.
+
+
+
+# Summary
+
+The results and findings provide insights into the MLP’s representational power, demonstrating the ability of them to approximate nonlinear functions and capture complex patterns in data. 
+
+
+

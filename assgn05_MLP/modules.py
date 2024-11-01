@@ -16,6 +16,8 @@ class Module:
 
     def parameters(self):
         return self.parameters
+    
+
 
 
 class Linear(Module):
@@ -24,7 +26,7 @@ class Linear(Module):
         super().__init__()
         self.input_size = input_size # input features
         self.output_size = output_size # output features
-        self.W = np.random.randn(input_size, output_size) * 0.1 
+        self.W = np.random.randn(input_size, output_size) * 0.01
         self.b = np.zeros((1, output_size))
         self.parameters = {"W": self.W, "b": self.b}
 
