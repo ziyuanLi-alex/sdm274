@@ -417,16 +417,23 @@ It is so resource-hungry that it might trigger **overflows**.
 
 ## Data gathering
 
-We choose the Wisconsin breast cancer dataset for classification.
+We generated a set of 2-feature binary classification data using sklearn.
 
-```markdown
-Training data shape: (455, 30)
-Testing data shape: (114, 30)
+```python
+from sklearn.datasets import  make_classification
+
+X,y = make_classification(n_samples=1000, n_features=2, n_informative=2,n_redundant=0, n_repeated=0, n_classes=2, n_clusters_per_class=2,class_sep=1.5, random_state=17)
+
+
 ```
 
-Here I used a **PCA to reduce the dimensions of the data to 2**. Note that we use the original 30-feature dataset for training and predicting, and we're **only using PCA for visualizing purpose.**
+```markdown
+Training data shape: (800, 2)
+Testing data shape: (200, 2)
 
-![image-20241101235332682](./assets/image-20241101235332682.png)
+```
+
+![image-20241104093123447](./assets/image-20241104093123447.png)
 
 I defined an MLPClassifier class that inherits from the wrapped MLP class. This structure ensures reusability.
 
@@ -470,7 +477,7 @@ I reused the model structure for the nonlinear function training. It balances pe
 
 ```python
 layers = [
-        Linear(input_size=30, output_size=64),
+        Linear(input_size=2, output_size=64),
         ReLU(),
         Linear(input_size=64, output_size=128),
         ReLU(),
@@ -483,27 +490,27 @@ layers = [
 I used MBGD in training, reaching about 400it/s with a good accuracy.
 
 ```markdown
-Training MBGD: 100%|██████████| 2000/2000 [00:04<00:00, 412.34it/s]
+Training MBGD: 100%|██████████| 2000/2000 [00:07<00:00, 284.20it/s]
 ```
 
-![image-20241101235836912](./assets/image-20241101235836912.png)
+![image-20241104093207586](./assets/image-20241104093207586.png)
 
-![image-20241101235851612](./assets/image-20241101235851612.png)
+![image-20241104093216198](./assets/image-20241104093216198.png)
+
+
 
 The model achieved high F1 score on this dataset.
 
 ```markdown
-Accuracy: 0.9649122807017544
-Recall: 0.971830985915493
-Precision: 0.971830985915493
-F1 Score: 0.971830985915493
+Accuracy: 0.975
+Recall: 1.0
+Precision: 0.9484536082474226
+F1 Score: 0.9735449735449735
 ```
 
-![image-20241102001701164](./assets/image-20241102001701164.png)
+![image-20241104093248870](./assets/image-20241104093248870.png)
 
-Above is the decision boundary of the trained MLP. As shown in the graph the boundary is **a folded line** instead of a straight line. This indicates that the MLP model has learned a **nonlinear decision boundary**. Unlike linear classifiers, which can only separate classes with straight lines or planes, an MLP with at least one hidden layer can model complex, nonlinear relationships between features.
-
-The dataset we choose here is largely linearly separable. Most parts of it can be approximately separated by a stright line, therefore the outliers won't punish the MLP to behave very non-linearly. Theoretically we can push the training and the parameters to extremes to let it  show more nonlinear characteristics, but that requires much more training resources and is somewhat beyond the scope of this assignment.
+Above is the decision boundary of the trained MLP. As shown in the graph the boundary is **a folded line** (like a lightning bolt) instead of a straight line. This indicates that the MLP model has learned a **nonlinear decision boundary**. Unlike linear classifiers, which can only separate classes with straight lines or planes, an MLP with at least one hidden layer can model complex, nonlinear relationships between features.
 
 Shown below is some sets cross-validation result. 
 
