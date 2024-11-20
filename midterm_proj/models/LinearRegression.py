@@ -15,6 +15,7 @@ class LinearRegression():
 
     def gradient(self, X, y, y_pred):
         y_pred = y_pred.reshape(-1, 1)
+        y = y.reshape(-1, 1)
         return  X.T @ (y_pred - y) / y.size
 
     def _preprocess(self, X):

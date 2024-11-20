@@ -1,4 +1,7 @@
+from matplotlib import pyplot as plt
 import numpy as np
+import seaborn as sns
+from sklearn.metrics import confusion_matrix, roc_auc_score, roc_curve
 
 class Evaluation():
 
@@ -68,5 +71,30 @@ class Evaluation():
         print(f'F1 Score: {f1_score}')
 
         return
-            
+    
+    def ROC(self, y_actual, y_pred):
+        # ROC Curve
+        fpr, tpr, thresholds = roc_curve(y_actual, y_pred)
+        auc = roc_auc_score(y_actual, y_pred)
+
+        # Plot ROC Curve
+        plt.figure()
+        plt.plot(fpr, tpr, color='blue', label=f'ROC Curve (AUC = {auc:.2f})')
+        plt.plot([0, 1], [0, 1], color='gray', linestyle='--')  # Diagonal reference line
+        plt.xlabel('False Positive Rate (FPR)')
+        plt.ylabel('True Positive Rate (TPR)')
+        plt.title('ROC Curve')
+        plt.legend(loc='lower right')
+        plt.grid()
+        plt.show()
+
+    def plot_confusion_matrix(self, y_actual, y_pred):
+        # Confusion Matrix
+        cm = confusion_matrix(y_actual, y_pred)
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False)
+        plt.xlabel('Predicted')
+        plt.ylabel('Actual')
+        plt.title('Confusion Matrix')
+        plt.show()
+                
 

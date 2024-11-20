@@ -4,8 +4,8 @@ import numpy as np
 
 class Perceptron():
 
-    def __init__(self, n_feature = 13, learning_rate = 1e-3, epochs = 100, tolerance = None, patience = 10):
-        self.learning_rate = learning_rate
+    def __init__(self, n_feature = 13, lr = 1e-3, epochs = 100, tolerance = None, patience = 10):
+        self.learning_rate = lr
         self.epochs = epochs
         self.W = np.random.random(n_feature + 1) * 0.5
         self.W = np.random.uniform(0.01, 0.01, n_feature + 1)
