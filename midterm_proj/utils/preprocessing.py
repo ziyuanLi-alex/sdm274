@@ -128,7 +128,23 @@ def undersample_data_numpy(X, y, random_state=42):
 
     return X_reduced, y_reduced
 
+def map_y(y):
+    """
+    Map target labels to 1 and 2 to be compatible with the Perceptron model.
+    
+    Parameters:
+        y (np.ndarray): Target labels.
+    
+    Returns:
+        y_mapped (np.ndarray): Mapped target labels.
+    """
+    y_mapped = np.where(y == 1, 1, 2)
+    return y_mapped
 
+def enhance_undersamp(X_train, X_test, y_train, y_test):
+    X_train, y_train = enhance_data(X_train, y_train)
+    X_test, y_test = undersample_data_numpy(X_test, y_test)
+    return X_train, X_test, y_train, y_test
 
 if __name__ == "__main__":
     X, y = load_and_clean_data()
