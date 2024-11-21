@@ -38,8 +38,8 @@ def evaluate_significance(X, y):
 if __name__ == "__main__":
     X = pd.read_csv('/root/sdm274/midterm_proj/data/X.csv')
     y = pd.read_csv('/root/sdm274/midterm_proj/data/y.csv')
-    evaluate_correlation(X)
-    # evaluate_significance(X, y)
+    # evaluate_correlation(X)
+    evaluate_significance(X, y)
 
 
 

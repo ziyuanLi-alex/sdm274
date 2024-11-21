@@ -6,7 +6,7 @@ from sklearn.utils import resample
 import pandas as pd
 from imblearn.over_sampling import SMOTE
 
-def load_and_clean_data(normalize=True, ovveride=False):
+def load_and_clean_data(normalize=True):
     ###
     # Load and clean the data
     # param controls normalization of the data
@@ -14,20 +14,19 @@ def load_and_clean_data(normalize=True, ovveride=False):
     ###
 
     # Check if processed files exist
-    X_path = '/root/sdm274/midterm_proj/data/X.csv'
-    y_path = '/root/sdm274/midterm_proj/data/y.csv'
-    # normalize = False
+    Data_path = '/root/sdm274/midterm_proj/data/ai4i2020.csv'
 
-    if os.path.exists(X_path) and os.path.exists(y_path) and not ovveride:
-        X = pd.read_csv(X_path)
-        y_trunc = pd.read_csv(y_path)
-        return X, y_trunc
-    
+    # normalize = False    
     # No missing values in the data  
-    ai4i_2020_predictive_maintenance_dataset = fetch_ucirepo(id=601)
-    X = ai4i_2020_predictive_maintenance_dataset.data.features
-    y_raw = ai4i_2020_predictive_maintenance_dataset.data.targets
-    y_trunc = y_raw.iloc[:, 0]
+    if os.path.exists(Data_path):
+        data = pd.read_csv(Data_path)
+        y_trunc = data.iloc[:, 9]
+        X = data.iloc[:, 2:8]
+    else:
+        raise FileNotFoundError(f"Data file not found at {Data_path}")
+    # X = ai4i_2020_predictive_maintenance_dataset.data.features
+    # y_raw = ai4i_2020_predictive_maintenance_dataset.data.targets
+    # y_trunc = y_raw.iloc[:, 0]
     # X.iloc[:, 1:] = X.iloc[:, 1:].astype(float)
 
     # Note that the data is mixed
