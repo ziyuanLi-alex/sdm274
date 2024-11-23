@@ -13,16 +13,23 @@ normalization = True
 
 def main():
     X, y = load_and_clean_data(normalize=normalization)
+    # drop air temperature column
+    X = X.drop(['Air temperature'], axis=1)
+    # drop torque column
+    # X = X.drop(['Torque'], axis=1)
+    X = X.drop(['Tool wear'], axis=1)
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
     X_train, X_test, y_train, y_test = convert_to_numpy(X_train, X_test, y_train, y_test)
     # X_train, X_test, y_train, y_test = enhance_undersamp(X_train, X_test, y_train, y_test)
     X_train, y_train = enhance_data(X_train, y_train)
-    X_test, y_test = undersample_data_numpy(X_test, y_test)
+    # X_train, y_train = undersample_data_numpy(X_train, y_train)
+    # X_test, y_test = undersample_data_numpy(X_test, y_test)
 
     eval = Evaluation()
 
 
-    models = {'Linear Regression': False, 'Perceptron': True, 'Logistic Regression': False, 'MLP': False}
+    models = {'Linear Regression': False, 'Perceptron': False, 'Logistic Regression': False, 'MLP': True}
 
     if models['Linear Regression']:
         # Dropping the last column
@@ -32,7 +39,7 @@ def main():
         eval = Evaluation()
 
         # Linear Regression
-        lr = LinearRegression(n_feature=7, lr=1e-7, epochs=500)
+        lr = LinearRegression(n_feature=7, lr=1e-5, epochs=500)
         lr.BGD(X_train_lin, y_train)
         y_pred = lr.predict(X_test_lin)
         # Min-Max Regularization for y_pred
@@ -60,7 +67,7 @@ def main():
         y_test_per = np.array([mapper(yi) for yi in y_test])
 
         # Perceptron
-        per = Perceptron(n_feature=8, lr=1e-6, epochs=500)
+        per = Perceptron(n_feature=6, lr=1e-4, epochs=500)
         per.BGD(X_train, y_train_per)
         y_pred = per.predict(X_test)
         # Min-Max Regularization for y_pred
@@ -96,7 +103,7 @@ def main():
         # y_test_log = np.array([mapper(yi) for yi in y_test])
 
         # Logistic Regression
-        log = LogisticRegression(n_feature=8, learning_rate=0.6, epochs=500)
+        log = LogisticRegression(n_feature=7, threshold=0.5,learning_rate=1e-2, epochs=500)
         log.BGD(X_train, y_train_log)
         y_pred = log.predict(X_test)
 
@@ -113,7 +120,7 @@ def main():
     if models['MLP']:
         # print(X_train_mlp.shape, X_test_mlp.shape, y_train_mlp.shape, y_test_mlp.shape)
         layers = [
-        Linear(input_size=8, output_size=64),
+        Linear(input_size=6, output_size=64),
         ReLU(),
         Linear(input_size=64, output_size=128),
         ReLU(),

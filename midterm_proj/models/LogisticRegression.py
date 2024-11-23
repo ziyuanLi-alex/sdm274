@@ -3,7 +3,7 @@ import numpy as np
 
 class LogisticRegression():
 
-    def __init__(self, n_feature = 13, learning_rate = 1e-5, epochs = 100, tolerance = None, patience = 10):
+    def __init__(self, n_feature = 13, learning_rate = 1e-5, epochs = 100, tolerance = None, patience = 10, threshold = 0.5):
         self.lr = learning_rate
         self.epochs = epochs
         # self.W = np.random.random(n_feature + 1)
@@ -12,6 +12,7 @@ class LogisticRegression():
         self.best_loss = np.inf
         self.tol = tolerance
         self.patience = patience
+        self.threshold = threshold
         
     def _linear_tf(self, X):
         return X @ self.W
@@ -151,7 +152,7 @@ class LogisticRegression():
     def predict(self, X):
         X = self._preprocess_data(X)
         y_pred = self._predict_probability(X)
-        return np.where(y_pred >= 0.5, 1, 0)
+        return np.where(y_pred >= self.threshold, 1, 0)
     
     def batch_cross_entropy_loss(self, y, y_pred):
         loss = np.where( y == y_pred, 0, 1)
