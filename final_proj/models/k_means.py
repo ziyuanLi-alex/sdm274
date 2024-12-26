@@ -16,8 +16,15 @@ class KMeansPlusPlus:
         self.max_iter = max_iter
         self.random_state = random_state
         self.centroids = None
-        self.labels_ = None
+        self._labels = None  # 内部标签存储
         
+    @property
+    def labels(self) -> np.ndarray:
+        """返回从1开始的聚类标签"""
+        if self._labels is None:
+            return None
+        return self._labels + 1
+
     def _init_centroids(self, X: npt.NDArray) -> npt.NDArray:
         """
         K-means++ 的初始化步骤
@@ -119,13 +126,13 @@ class KMeansPlusPlus:
             new_labels = self._assign_clusters(distances)
             
             # 如果标签没有变化，则停止迭代
-            if self.labels_ is not None and np.all(new_labels == self.labels_):
+            if self._labels is not None and np.all(new_labels == self._labels):
                 break
                 
-            self.labels_ = new_labels
+            self._labels = new_labels
             
             # 更新质心
-            self.centroids = self._update_centroids(X, self.labels_)
+            self.centroids = self._update_centroids(X, self._labels)
             
         return self
     
@@ -163,5 +170,5 @@ if __name__ == "__main__":
     kmeans.fit(X)
     
     # 打印结果
-    print("聚类标签:", kmeans.labels_)
+    print("聚类标签:", kmeans.labels)
     print("质心:", kmeans.centroids)
