@@ -121,14 +121,14 @@ if __name__ == "__main__":
     soft_kmeans_ae = SoftKMeans(n_clusters=3)
    
 
-    visualizer = ClusteringVisualizer()
+    # visualizer = ClusteringVisualizer()
 
-    visualizer.plot_reconstruction_comparison(
-        X, X_recon_pca, 'PCA Reconstruction Comparison'
-    )
-    visualizer.plot_reconstruction_comparison(
-        X, X_recon_ae, 'Autoencoder Reconstruction Comparison'
-    )
+    # visualizer.plot_reconstruction_comparison(
+    #     X, X_recon_pca, 'PCA Reconstruction Comparison'
+    # )
+    # visualizer.plot_reconstruction_comparison(
+    #     X, X_recon_ae, 'Autoencoder Reconstruction Comparison'
+    # )
 
      # 2. 聚类结果可视化
     plt.figure(figsize=(15, 10))

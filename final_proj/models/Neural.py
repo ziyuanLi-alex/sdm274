@@ -180,22 +180,17 @@ class MLP(Module):
             for i in range(0, m, batch_size):
                 X_batch = X_shuffled[i:i + batch_size]
                 Y_batch = Y_shuffled[i:i + batch_size]
-
-                Y_batch = Y_batch.reshape(-1, 1)
+                
+                # 移除强制reshape
                 X_batch = X_batch.reshape(-1, self.input_shape)
 
                 A = self.forward(X_batch)
                 loss = self.get_loss(A, Y_batch)
                 self.loss.append(loss)
 
-                # A here is the predicted array
                 dA = self.get_loss_grad(A, Y_batch)
                 self.backward(dA)
                 self.update_params(lr)
-                # Validation on the test dataset
-                # A_test = self.inference(X_test)
-                # val_loss = self.get_loss(A_test, y_test)
-                # self.validation_loss.append(val_loss)
 
     def train_SGD(self, X, Y, epochs=None, lr=None):
         if epochs is None:
