@@ -27,6 +27,13 @@ class SoftKMeans:
         self.centroids = None
         self.membership = None
 
+    @property
+    def labels(self) -> np.ndarray:
+        """返回从1开始的聚类标签"""
+        if self.membership is None:
+            return None
+        return np.argmax(self.membership, axis=1) + 1
+
     def _compute_distances(self, X: npt.NDArray) -> npt.NDArray:
         """
         计算每个数据点到所有簇中心的距离

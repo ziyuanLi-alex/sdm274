@@ -289,3 +289,40 @@ class MLPClassifier(MLP):
         return (y_pred > self.threshold).astype(int)
     
 
+class MLPMultiClass(MLP):
+
+    def __init__(self, layers, epochs=1000, lr=0.01, input_shape=1, output_shape=1):
+        super().__init__(layers, epochs, lr, input_shape, output_shape)
+        
+    def softmax(self, logits):
+        # Returns a list of probabilities, does not change the dimension.
+        exps = np.exp(logits - np.max(logits, axis=1, keepdims=True))
+        return exps / np.sum(exps, axis=1, keepdims=True) 
+
+    def get_loss(self, y_pred_logit, y_true):
+        y_pred = self.softmax(y_pred_logit)
+        # Clip predictions to prevent division by zero
+        y_pred = np.clip(y_pred, 1e-12, 1. - 1e-12)
+        # Compute cross-entropy loss
+        return -np.sum(y_true * np.log(y_pred)) / y_true.shape[0]
+
+    def get_loss_grad(self, y_pred_logit, y_true):
+        # The loss here is the cross-entropy loss
+        # It accepts matrix with the shape (x, n_classes)
+        # Where x is the number of samples and n_classes is the number of classes
+
+        y_pred_logit = y_pred_logit.reshape(-1, self.output_shape)
+        # Clip predictions to prevent division by zero
+        # y_pred = np.clip(y_pred, 1e-12, 1. - 1e-12)
+        # Compute gradient of cross-entropy loss
+        y_pred = self.softmax(y_pred_logit)
+        return y_pred - y_true
+    
+    def predict(self, X):
+        # Forward pass
+        y_pred_logit = self.forward(X)       
+        return np.argmax(self.softmax(y_pred_logit), axis=1)
+    
+    def predict_logits(self, X):
+        # Forward pass
+        return self.forward(X)
