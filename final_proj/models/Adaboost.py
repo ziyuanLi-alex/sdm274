@@ -98,7 +98,6 @@ class AdaBoost:
 if __name__ == "__main__":
     from utils.preprocessing import load_data
     from sklearn.model_selection import train_test_split
-    from sklearn.metrics import accuracy_score
     
     # 加载数据
     X, y = load_data()

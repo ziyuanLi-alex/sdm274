@@ -145,6 +145,7 @@ if __name__ == "__main__":
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
     from utils.preprocessing import load_data
+    from mpl_toolkits.mplot3d import Axes3D
     
     # 加载数据
     X, y = load_data()
@@ -153,10 +154,38 @@ if __name__ == "__main__":
 
     # 初始化PCA模型
     pca = PCA(n_components=2, random_state=42)
+    pca_3 = PCA(n_components=3, random_state=42)
+
     X_transformed = pca.fit(X).transform(X)
     X_reconstructed = pca.inverse_transform(X_transformed)
 
+    X_transformed_3 = pca_3.fit(X).transform(X)
+    X_reconstructed_3 = pca_3.inverse_transform(X_transformed_3)
+
     reconstruction_error = np.mean((X_reconstructed - X) ** 2)
+    reconstruction_error_3 = np.mean((X_reconstructed_3 - X) ** 2)
 
     print('Reconstruction error:', reconstruction_error)
+    print('Reconstruction error (3 components):', reconstruction_error_3)
 
+    import matplotlib.pyplot as plt
+
+    # 可视化转换后的数据点
+    plt.figure(figsize=(8, 6))
+    plt.scatter(X_transformed[:, 0], X_transformed[:, 1], c=y, cmap='viridis', edgecolor='k', s=50)
+    plt.xlabel('Principal Component 1')
+    plt.ylabel('Principal Component 2')
+    plt.title('PCA of Dataset (2 components)')
+    plt.colorbar()
+    plt.show()
+    # 可视化3维转换后的数据点
+
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111, projection='3d')
+    scatter = ax.scatter(X_transformed_3[:, 0], X_transformed_3[:, 1], X_transformed_3[:, 2], c=y, cmap='viridis', edgecolor='k', s=50)
+    ax.set_xlabel('Principal Component 1')
+    ax.set_ylabel('Principal Component 2')
+    ax.set_zlabel('Principal Component 3')
+    ax.set_title('PCA of Dataset (3 components)')
+    fig.colorbar(scatter)
+    plt.show()

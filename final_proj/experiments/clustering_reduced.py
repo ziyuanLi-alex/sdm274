@@ -16,64 +16,6 @@ import matplotlib.pyplot as plt
 
 set_seed(42)
 
-class ClusteringVisualizer:
-    @staticmethod
-    def plot_clustering_results(data_2d, labels, title, ax=None):
-        """绘制二维聚类结果"""
-        if ax is None:
-            ax = plt.gca()
-            
-        scatter = ax.scatter(data_2d[:, 0], data_2d[:, 1], c=labels, cmap='viridis')
-        ax.set_title(title)
-        ax.set_xlabel('Component 1')
-        ax.set_ylabel('Component 2')
-        return scatter
-    
-    @staticmethod
-    def plot_reconstruction_comparison(original, reconstructed, title, max_samples=5):
-        """比较原始数据和重构数据"""
-        n_samples = min(max_samples, original.shape[0])
-        n_features = original.shape[1]
-        
-        fig, axes = plt.subplots(n_samples, 1, figsize=(12,9))
-        if n_samples == 1:
-            axes = [axes]
-            
-        for i in range(n_samples):
-            ax = axes[i]
-            x = np.arange(n_features)
-            width = 0.35
-            
-            ax.bar(x - width/2, original[i], width, label='Original', alpha=0.6)
-            ax.bar(x + width/2, reconstructed[i], width, label='Reconstructed', alpha=0.6)
-            
-            ax.set_xlabel('Features')
-            ax.set_ylabel('Values')
-            ax.set_title(f'Sample {i+1}')
-            ax.legend()
-        
-        plt.suptitle(title)
-        plt.tight_layout()
-        return fig
-    
-    @staticmethod
-    def plot_all_clustering_results(data_dict, labels_dict, true_labels=None):
-        """绘制所有聚类结果的对比图"""
-        n_plots = len(data_dict)
-        fig, axes = plt.subplots(1, n_plots, figsize=(10,8))
-        if n_plots == 1:
-            axes = [axes]
-        
-        for (name, data), ax in zip(data_dict.items(), axes):
-            labels = labels_dict[name]
-            scatter = ClusteringVisualizer.plot_clustering_results(data, labels, name, ax)
-            plt.colorbar(scatter, ax=ax)
-            
-        plt.tight_layout()
-        return fig
-
-
-
 if __name__ == "__main__":
     # 加载数据
     X, y = load_data()
@@ -94,7 +36,7 @@ if __name__ == "__main__":
         Linear(2,2),
         Linear(input_size=2, output_size=7)
     ]
-    ae = AutoEncoder(nonlinear_layers, epochs=50000, lr=1e-2, input_shape=7, output_shape=7)
+    ae = AutoEncoder(nonlinear_layers, epochs=5000, lr=1e-2, input_shape=7, output_shape=7)
     ae.train_BGD(X, X)
     X_ae = ae.encode(X)
     X_recon_ae = ae.predict(X)
@@ -120,15 +62,6 @@ if __name__ == "__main__":
     soft_kmeans_pca = SoftKMeans(n_clusters=3)
     soft_kmeans_ae = SoftKMeans(n_clusters=3)
    
-
-    # visualizer = ClusteringVisualizer()
-
-    # visualizer.plot_reconstruction_comparison(
-    #     X, X_recon_pca, 'PCA Reconstruction Comparison'
-    # )
-    # visualizer.plot_reconstruction_comparison(
-    #     X, X_recon_ae, 'Autoencoder Reconstruction Comparison'
-    # )
 
      # 2. 聚类结果可视化
     plt.figure(figsize=(15, 10))

@@ -157,6 +157,7 @@ if __name__ == "__main__":
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
     from utils.preprocessing import load_data
+    from utils.align_labels import align_labels_hungarian
     
     # 加载数据
     X, y = load_data()
@@ -172,3 +173,11 @@ if __name__ == "__main__":
     # 打印结果
     print("聚类标签:", kmeans.labels)
     print("质心:", kmeans.centroids)
+
+    # print("聚类标签:", kmeans.labels[:6])
+    # print("参考标签：\n", y[:6])
+
+    aligned_labels, accuracy = align_labels_hungarian(kmeans.labels, y)
+    print(f"调整后的标签：\n{aligned_labels[:20]}")
+    print(f"参考标签：\n{y[:20].values}")
+    print(f"准确率: {accuracy:.4f}")

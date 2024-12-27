@@ -158,26 +158,67 @@ if __name__ == "__main__":
     nonlin_autoencoder = AutoEncoder(nonlinear_layers, epochs=epochs, lr=lr, input_shape=7, output_shape=7)
     nonlin_autoencoder.train_BGD(X, X)
 
+    # Implement another autoencoder with a middle layer of 3 dimensions
+    nonlinear_layers_3d = [
+        Linear(input_size=7, output_size=3),
+        ReLU(),
+        Linear(3, 3),
+        Linear(input_size=3, output_size=7)
+    ]
 
-    X_recon = nonlin_autoencoder.predict(X)
-    print(X_recon[:1])
-    print(X[:1])
-    print("Reconstruction Error:" , nonlin_autoencoder.get_loss(X_recon, X))
+    autoencoder_3d = AutoEncoder(nonlinear_layers_3d, epochs=10000, lr=lr, input_shape=7, output_shape=7)
+    autoencoder_3d.train_BGD(X, X)
+
+    # X_recon_3d = autoencoder_3d.predict(X)
+    # print(X_recon_3d[:5])
+    # print(X[:5])
+    # print("Reconstruction Error with 3D middle layer:", autoencoder_3d.get_loss(X_recon_3d, X))
+
+    # X_recon = nonlin_autoencoder.predict(X)
+    # print(X_recon[:1])
+    # print(X[:1])
+    # print("Reconstruction Error:" , nonlin_autoencoder.get_loss(X_recon, X))
 
     # Visualize the original data and reconstructed data using bar charts
-    fig, ax = plt.subplots(figsize=(12,9), nrows=4, ncols=3)
+    # fig, ax = plt.subplots(figsize=(12,9), nrows=4, ncols=3)
 
-    for i in range(1,5):
-        for j in range(1,4):
-            ax[i-1, j-1].bar(range(X.shape[1]), X[i*j-1], color='blue', alpha=0.5, label='Original Data')
-            ax[i-1, j-1].bar(range(X_recon.shape[1]), X_recon[i*j-1], color='red', alpha=0.5, label='Reconstructed Data')
-            ax[i-1, j-1].set_xlabel('Features')
-            ax[i-1, j-1].set_ylabel('Values')
+    # for i in range(1,5):
+    #     for j in range(1,4):
+    #         ax[i-1, j-1].bar(range(X.shape[1]), X[i*j-1], color='blue', alpha=0.5, label='Original Data')
+    #         ax[i-1, j-1].bar(range(X_recon.shape[1]), X_recon[i*j-1], color='red', alpha=0.5, label='Reconstructed Data')
+    #         ax[i-1, j-1].set_xlabel('Features')
+    #         ax[i-1, j-1].set_ylabel('Values')
 
+    # plt.show()
+
+    # print(X[:5])
+    # print(X_recon[:5])
+
+    # Visualize the encoded data points
+    encoded_data = nonlin_autoencoder.encode(X)
+    encoded_data_3d = autoencoder_3d.encode(X)
+
+    import matplotlib.pyplot as plt
+
+    # 可视化转换后的数据点
+    plt.figure(figsize=(8, 6))
+    plt.scatter(encoded_data[:, 0], encoded_data[:, 1], c=y, cmap='viridis', edgecolor='k', s=50)
+    plt.xlabel('Principal Component 1')
+    plt.ylabel('Principal Component 2')
+    plt.title('Encoded Dataset (2 components)')
+    plt.colorbar()
     plt.show()
+    # 可视化3维转换后的数据点
 
-    print(X[:5])
-    print(X_recon[:5])
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111, projection='3d')
+    scatter = ax.scatter(encoded_data_3d[:, 0], encoded_data_3d[:, 1], encoded_data_3d[:, 2], c=y, cmap='viridis', edgecolor='k', s=50)
+    ax.set_xlabel('Principal Component 1')
+    ax.set_ylabel('Principal Component 2')
+    ax.set_zlabel('Principal Component 3')
+    ax.set_title('Encoded Dataset (3 components)')
+    fig.colorbar(scatter)
+    plt.show()
 
 
 
