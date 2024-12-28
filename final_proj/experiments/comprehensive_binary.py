@@ -65,6 +65,10 @@ def MLP_analysis():
     plt.title('Confusion Matrix')
     plt.show()
 
+    # eval.calculate_accuracy(y_test_numerical, y_pred)
+    print(eval.calculate_accuracy(y_test_numerical, y_pred))
+    print(classification_report(y_test_numerical, y_pred))
+
 def SVM_analysis():
     classifiers = {
         'Linear SVM': OVOSVM(C=1.0, kernel='linear'),
@@ -130,9 +134,9 @@ if __name__ == "__main__":
 
     # MLP_analysis()
 
-    # SVM_analysis()
+    SVM_analysis()
 
-    Adaboost_analysis()
+    # Adaboost_analysis()
 
 
 
